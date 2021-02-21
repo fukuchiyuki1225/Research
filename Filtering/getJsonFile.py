@@ -9,7 +9,7 @@ for p_id in p_ids:
     print(str(i))
     try:
         url = "https://projects.scratch.mit.edu/" + str(p_id)
-        savePass = "./projectJSON/" + p_id
+        savePass = "./projectJSON/" + str(p_id) + ".json"
         urllib.request.urlretrieve(url, savePass)
     except:
         pass
