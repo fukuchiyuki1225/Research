@@ -1,0 +1,17 @@
+import pandas as pd
+import urllib.request
+import time
+
+p_ids = pd.read_csv('./cat.csv')['p_id'].tolist()
+
+i = 0
+for p_id in p_ids:
+    print(str(i))
+    try:
+        url = "https://projects.scratch.mit.edu/" + str(p_id)
+        savePass = "./projectJSON/" + p_id
+        urllib.request.urlretrieve(url, savePass)
+    except:
+        pass
+    i = i + 1
+    time.sleep(1)
