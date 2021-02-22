@@ -5,8 +5,6 @@ import cv2
 
 filePass = "/Users/yuki-f/Documents/SocSEL/Research/Filtering/projectJSON/"
 
-ids = pd.read_csv("./cat.csv", usecols=["p_id"], dtype="str")
-
 df = pd.DataFrame(columns=["id"])
 
 jsonFiles = os.listdir(filePass)
@@ -52,6 +50,5 @@ for prjId in fileNames:
 
     if roopFlag == False and eventFlag == False and motionFlag == True:
         df = df.append(pd.DataFrame(data=[[prjId]],columns=["id"]))
-
         
 df.to_csv("./filterd_cat.csv")
