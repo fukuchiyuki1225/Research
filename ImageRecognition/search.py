@@ -9,13 +9,14 @@ def centerOfCoordinates(coordinates):
     value = 0
     for coor in coordinates:
         value += coordinates[coor]
+    print(value / 4)
     return value / 4
 
 input = []
-input.append(cv2.imread("./input.png"))
-input.append(cv2.imread("./input2.png"))
+input.append(cv2.imread("./bouningen-1.png"))
+input.append(cv2.imread("./bouningen-2.png"))
 
-template = cv2.imread("./cat.png")
+template = cv2.imread("./bouningen.png")
 
 # 物体検出に必要な対応点の数の下限
 MIN_MATCH_COUNT = 10
