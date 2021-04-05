@@ -1,6 +1,7 @@
 import os
 import cv2
 import numpy as np
+from numpy import linalg as LA
 import pandas as pd
 import math
 
@@ -11,6 +12,13 @@ def centerOfCoordinates(coordinates):
         value += coordinates[coor]
     return value / 4
 
+# なす角を求める関数
+def tangent_angle(u: np.ndarray, v: np.ndarray):
+    i = np.inner(u, v)
+    n = LA.norm(u) * LA.norm(v)
+    c = i / n
+    return np.rad2deg(np.arccos(np.clip(c, -1.0, 1.0)))
+
 # 物体検出に必要な対応点の数の下限
 MIN_MATCH_COUNT = 10
 
@@ -18,6 +26,8 @@ MIN_MATCH_COUNT = 10
 template = cv2.imread("./cat.png")
 
 path = "/Users/yuki-f/Documents/SocSEL/Research/Selenium/screenshots/screenshots_cat"
+path = "/Users/yuki-f/Documents/SocSEL/Research/Selenium/screenshots/sample"
+
 
 df = pd.DataFrame(columns=["id", "movement"])
 
@@ -102,12 +112,12 @@ for pathName, dirNames, fileNames in os.walk(path):
             # print("error")
             continue
 
-        # results = cv2.drawMatches(template,kp_t,screenshot,kp_s,good,None,**draw_params)
+        results = cv2.drawMatches(template,kp_t,screenshot,kp_s,good,None,**draw_params)
 
         # cv2.circle(results, (math.floor(centerOfCoordinates(coordinates[i]["x"])) + 168, math.floor(centerOfCoordinates(coordinates[i]["y"]))), 10, (0, 255, 0), thickness=-1)
 
-        # cv2.imshow(fileName, results)
-        # cv2.waitKey(0)    
+        cv2.imshow(fileName, results)
+        cv2.waitKey(0)    
     
     # print(prjId) 
 
@@ -119,6 +129,11 @@ for pathName, dirNames, fileNames in os.walk(path):
     y1 = centerOfCoordinates(coordinates[0]["y"])
     y2 = centerOfCoordinates(coordinates[len(coordinates) - 1]["y"])
 
+    print("1: " + str(x1) + ", " + str(y1) + " 2: " + str(x2) + ", " + str(y2))
+    print(math.floor(tangent_angle([x1, y1], [x2, y2])))
+
+    angle = math.floor(tangent_angle([x1, y1], [x2, y2]))
+
     deltaX = math.floor(x2 - x1) if x2 - x1 > 0 else math.ceil(x2 - x1)
     deltaY = math.floor(y2 - y1) if y2 - y1 > 0 else math.ceil(y2 - y1)
 
@@ -127,42 +142,57 @@ for pathName, dirNames, fileNames in os.walk(path):
 
     if deltaX > 0:
         if deltaY > 0:
-            # df.loc[prjId] = ["lowerRight"] 
-            df = df.append(pd.DataFrame(data=[[prjId, "lowerRight"]],columns=["id", "movement"]))
-            # print("右下に移動")
+            if angle <= 10:
+                if abs(deltaX) < abs(deltaY):
+                    df = df.append(pd.DataFrame(data=[[prjId, "down"]],columns=["id", "movement"]))
+                elif abs(deltaY) < abs(deltaX):
+                    df = df.append(pd.DataFrame(data=[[prjId, "right"]],columns=["id", "movement"]))
+            else:
+                df = df.append(pd.DataFrame(data=[[prjId, "lowerRight"]],columns=["id", "movement"]))
+                # print("右下に移動")
         elif deltaY == 0:
-            # df.loc[prjId] = ["right"]
             df = df.append(pd.DataFrame(data=[[prjId, "right"]],columns=["id", "movement"]))
             # print("右に移動")
         elif deltaY < 0:
-            # df.loc[prjId] = ["upperRight"]
-            df = df.append(pd.DataFrame(data=[[prjId, "upperRight"]],columns=["id", "movement"]))
-            # print("右上に移動")
+            if angle <= 10:
+                if abs(deltaX) < abs(deltaY):
+                    df = df.append(pd.DataFrame(data=[[prjId, "up"]],columns=["id", "movement"]))
+                elif abs(deltaY) < abs(deltaX):
+                    df = df.append(pd.DataFrame(data=[[prjId, "right"]],columns=["id", "movement"]))
+            else:
+                df = df.append(pd.DataFrame(data=[[prjId, "upperRight"]],columns=["id", "movement"]))
+                # print("右上に移動")
     elif deltaX == 0:
         if deltaY == 0:
             o = 0
-            # df = df.append(pd.DataFrame(data=[[prjId, "stop"]],columns=["id", "movement"]))
         elif deltaY > 0:
-            # df.loc[prjId] = ["down"]
             df = df.append(pd.DataFrame(data=[[prjId, "down"]],columns=["id", "movement"]))
             # print("下に移動")
         elif deltaY < 0:
-            # df.loc[prjId] = ["up"]
             df = df.append(pd.DataFrame(data=[[prjId, "up"]],columns=["id", "movement"]))
             # print("上に移動")
     elif deltaX < 0:
         if deltaY > 0:
-            # df.loc[prjId] = ["lowerLeft"]
-            df = df.append(pd.DataFrame(data=[[prjId, "lowerLeft"]],columns=["id", "movement"]))
-            # print("左下に移動")
+            if angle <= 10:
+                if abs(deltaX) < abs(deltaY):
+                    df = df.append(pd.DataFrame(data=[[prjId, "down"]],columns=["id", "movement"]))
+                elif abs(deltaY) < abs(deltaX):
+                    df = df.append(pd.DataFrame(data=[[prjId, "left"]],columns=["id", "movement"]))
+            else:
+                df = df.append(pd.DataFrame(data=[[prjId, "lowerLeft"]],columns=["id", "movement"]))
+                # print("左下に移動")
         elif deltaY == 0:
-            # df.loc[prjId] = ["left"]
             df = df.append(pd.DataFrame(data=[[prjId, "left"]],columns=["id", "movement"]))
             # print("左に移動")
         elif deltaY < 0:
-            # df.loc[prjId] = ["upperLeft"]
-            df = df.append(pd.DataFrame(data=[[prjId, "upperLeft"]],columns=["id", "movement"]))
-            # print("左上に移動")
+            if angle <= 10:
+                if abs(deltaX) < abs(deltaY):
+                    df = df.append(pd.DataFrame(data=[[prjId, "up"]],columns=["id", "movement"]))
+                elif abs(deltaY) < abs(deltaX):
+                    df = df.append(pd.DataFrame(data=[[prjId, "left"]],columns=["id", "movement"]))
+            else:
+                df = df.append(pd.DataFrame(data=[[prjId, "upperLeft"]],columns=["id", "movement"]))
+                # print("左上に移動")
 
     # if prjId == "0":
     #     for i in range(len(coordinates)):
@@ -171,5 +201,5 @@ for pathName, dirNames, fileNames in os.walk(path):
     #         print("左下：(" + str(coordinates[i]["x"]["lowerLeft"]) + ", " + str(coordinates[i]["y"]["lowerLeft"]) + ")")
     #         print("右下：(" + str(coordinates[i]["x"]["lowerRight"]) + ", " + str(coordinates[i]["y"]["lowerRight"]) + ")")
 
-df.to_csv("./dataset.csv")
+# df.to_csv("./dataset.csv")
 
