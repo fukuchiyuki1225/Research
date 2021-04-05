@@ -1,1 +1,4 @@
 Selenium/screenshots/
+
+*.csv
+*.json

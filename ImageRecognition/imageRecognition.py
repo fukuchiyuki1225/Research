@@ -17,7 +17,7 @@ MIN_MATCH_COUNT = 10
 # 画像の読み込み
 template = cv2.imread("./cat.png")
 
-path = "/Users/yuki-f/Documents/SocSEL/Research/Selenium/screenshots"
+path = "/Users/yuki-f/Documents/SocSEL/Research/Selenium/screenshots/screenshots_cat"
 
 df = pd.DataFrame(columns=["id", "movement"])
 
