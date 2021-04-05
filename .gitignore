@@ -2,3 +2,7 @@ Selenium/screenshots/
 
 Filtering/projectJSON
 Filtering/testJSON
+
+*.csv
+*.json
+

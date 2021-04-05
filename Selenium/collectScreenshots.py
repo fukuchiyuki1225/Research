@@ -7,7 +7,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
 
-ids = pd.read_csv("./cat.csv", usecols=["p_id"], dtype="str")
+ids = pd.read_csv("./filterd_cat.csv", usecols=["p_id"], dtype="str")
 
 for id in ids["p_id"]:
     driver = webdriver.Chrome("/usr/local/bin/chromedriver")
@@ -23,7 +23,7 @@ for id in ids["p_id"]:
         print("timeout")
         continue
 
-    savePath = "./screenshots/" + id
+    savePath = "./screenshots_cat/" + id
     if not os.path.isdir(savePath):
         os.mkdir(savePath)
 
@@ -32,7 +32,7 @@ for id in ids["p_id"]:
 
     time.sleep(0.03)
 
-    for i in range(100):
+    for i in range(200):
         end = driver.find_elements_by_css_selector(".green-flag_green-flag_1kiAo.green-flag_is-active_2oExT")
         if len(end) == 0:
             break
