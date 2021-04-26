@@ -1,8 +1,9 @@
+import sys
 import pandas as pd
 import urllib.request
 import time
 
-p_ids = pd.read_csv('./test.csv')['p_id'].tolist()
+p_ids = pd.read_csv("./metadata.csv")["p_ID"].tolist()
 
 i = 0
 for p_id in p_ids:
