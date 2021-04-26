@@ -1,15 +1,16 @@
 import os
 import time
 import pandas as pd
+# import chromedriver_binary
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
 
-ids = pd.read_csv("./filterd_cat.csv", usecols=["p_id"], dtype="str")
+ids = pd.read_csv("/Users/socsel/dataset3.csv", usecols=["p_ID"], dtype="str")
 
-for id in ids["p_id"]:
+for id in ids["p_ID"]:
     driver = webdriver.Chrome("/usr/local/bin/chromedriver")
     driver.get("https://scratch.mit.edu/projects/" + id)
 
@@ -23,7 +24,7 @@ for id in ids["p_id"]:
         print("timeout")
         continue
 
-    savePath = "./screenshots_cat/" + id
+    savePath = "/Users/socsel/screenshots/" + id
     if not os.path.isdir(savePath):
         os.mkdir(savePath)
 
@@ -32,7 +33,9 @@ for id in ids["p_id"]:
 
     time.sleep(0.03)
 
-    for i in range(200):
+    start = time.time()
+    for i in range(100):
+        time.sleep(0.2)
         end = driver.find_elements_by_css_selector(".green-flag_green-flag_1kiAo.green-flag_is-active_2oExT")
         if len(end) == 0:
             break
@@ -42,6 +45,8 @@ for id in ids["p_id"]:
                 f.write(png)
         except OSError as oe:
             print("save error")
-    
+    elapsed_time = time.time() - start
+    print(elapsed_time)
+
     driver.close()
 
