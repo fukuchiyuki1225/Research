@@ -8,7 +8,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
 
-ids = pd.read_csv("/Users/socsel/dataset3.csv", usecols=["p_ID"], dtype="str")
+ids = pd.read_csv("/Users/socsel/dataset.csv", usecols=["p_ID"], dtype="str")
 
 for id in ids["p_ID"]:
     driver = webdriver.Chrome("/usr/local/bin/chromedriver")
