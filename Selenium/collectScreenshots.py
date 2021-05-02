@@ -9,7 +9,8 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
 
 ids = pd.read_csv("/Users/yuki-f/Documents/SocSEL/Research/Selenium/sample.csv", usecols=["p_ID"], dtype="str")
-retryIds = []
+retryIds = pd.read_csv("/Users/yuki-f/Documents/SocSEL/Research/Selenium/retryIds.csv", usecols=["p_ID"], dtype="str")
+retryIds = list(retryIds)
 
 for id in ids["p_ID"]:
     driver = webdriver.Chrome("/usr/local/bin/chromedriver")
@@ -48,7 +49,7 @@ for id in ids["p_ID"]:
                 break # 作品のプログラムが終了していれば，スクリーンショット収集終了
             png = driver.find_element_by_class_name("stage-wrapper_stage-canvas-wrapper_3ewmd").screenshot_as_png # スクリーンショットを取得
         except Exception as e:
-            print(id + ": " + e) # 予期せぬエラー
+            print(id + ": error") # 予期せぬエラー
             retryIds.append(id) # エラーが発生した場合，後ほど再試行するためidを配列に追加して保持
             break
 
