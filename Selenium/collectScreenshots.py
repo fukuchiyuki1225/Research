@@ -63,14 +63,12 @@ for id in ids["p_ID"]:
     elapsedTime = time.time() - startTime
     print(id + ": " + str(elapsedTime) + "s")
 
+    df = pd.DataFrame(retryIds, columns=["p_ID"])
+
+    if len(retryIds) > 1:
+        df.to_csv("retryIds.csv")
+
     driver.close()
 
-retryIds.append("1")
-retryIds.append("2")
-
-df = pd.DataFrame(retryIds, columns=["p_ID"])
-
-if len(retryIds) > 1:
-    df.to_csv("retryIds.csv")
 driver.quit()
 
