@@ -1,8 +1,4 @@
-Selenium/screenshots/
-
-Filtering/projectJSON
-Filtering/testJSON
-
+*.png
 *.csv
 *.json
 
