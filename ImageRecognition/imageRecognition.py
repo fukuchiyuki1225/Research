@@ -6,7 +6,7 @@ import pandas as pd
 import math
 
 # 中心座標を求める関数
-def centerOfCoordinates(coordinates):
+def centerCoordinates(coordinates):
     value = 0
     for coor in coordinates:
         value += coordinates[coor]
