@@ -1,7 +1,7 @@
 import os
 import time
 import pandas as pd
-import chromedriver-binary
+# import chromedriver-binary
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
