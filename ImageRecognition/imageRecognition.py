@@ -124,10 +124,10 @@ for pathName, dirNames, fileNames in os.walk(path):
     if len(coordinates) <= 0:
         continue
 
-    x1 = centerOfCoordinates(coordinates[0]["x"])
-    x2 = centerOfCoordinates(coordinates[len(coordinates) - 1]["x"])
-    y1 = centerOfCoordinates(coordinates[0]["y"])
-    y2 = centerOfCoordinates(coordinates[len(coordinates) - 1]["y"])
+    x1 = centerCoordinates(coordinates[0]["x"])
+    x2 = centerCoordinates(coordinates[len(coordinates) - 1]["x"])
+    y1 = centerCoordinates(coordinates[0]["y"])
+    y2 = centerCoordinates(coordinates[len(coordinates) - 1]["y"])
 
     print("1: " + str(x1) + ", " + str(y1) + " 2: " + str(x2) + ", " + str(y2))
     print(math.floor(tangent_angle([x1, y1], [x2, y2])))
