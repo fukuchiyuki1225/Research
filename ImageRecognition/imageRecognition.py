@@ -22,7 +22,7 @@ def tangent_angle(u: np.ndarray, v: np.ndarray):
 # 物体検出に必要な対応点の数の下限
 MIN_MATCH_COUNT = 10
 
-# 画像の読み込み
+# テンプレート画像の読み込み
 template = cv2.imread("./cat.png")
 
 path = "/Users/yuki-f/Documents/SocSEL/Research/Selenium/screenshots/screenshots_cat"
