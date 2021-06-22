@@ -6,7 +6,7 @@ import pandas as pd
 import math
 
 # 中心座標を求める関数
-def centerCoordinates(coordinates):
+def centerCoordinate(coordinates):
     value = 0
     for coor in coordinates:
         value += coordinates[coor]
@@ -124,10 +124,10 @@ for pathName, dirNames, fileNames in os.walk(path):
     if len(coordinates) <= 0:
         continue
 
-    x1 = centerCoordinates(coordinates[0]["x"])
-    x2 = centerCoordinates(coordinates[len(coordinates) - 1]["x"])
-    y1 = centerCoordinates(coordinates[0]["y"])
-    y2 = centerCoordinates(coordinates[len(coordinates) - 1]["y"])
+    x1 = centerCoordinate(coordinates[0]["x"])
+    x2 = centerCoordinate(coordinates[len(coordinates) - 1]["x"])
+    y1 = centerCoordinate(coordinates[0]["y"])
+    y2 = centerCoordinate(coordinates[len(coordinates) - 1]["y"])
 
     print("1: " + str(x1) + ", " + str(y1) + " 2: " + str(x2) + ", " + str(y2))
     print(math.floor(tangent_angle([x1, y1], [x2, y2])))
