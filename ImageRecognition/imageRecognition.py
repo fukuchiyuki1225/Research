@@ -6,7 +6,7 @@ import pandas as pd
 import math
 
 # 中心座標を求める関数
-def centerOfCoordinates(coordinates):
+def centerCoordinate(coordinates):
     value = 0
     for coor in coordinates:
         value += coordinates[coor]
@@ -22,7 +22,7 @@ def tangent_angle(u: np.ndarray, v: np.ndarray):
 # 物体検出に必要な対応点の数の下限
 MIN_MATCH_COUNT = 10
 
-# 画像の読み込み
+# テンプレート画像の読み込み
 template = cv2.imread("./cat.png")
 
 path = "/Users/yuki-f/Documents/SocSEL/Research/Selenium/screenshots/screenshots_cat"
@@ -124,10 +124,10 @@ for pathName, dirNames, fileNames in os.walk(path):
     if len(coordinates) <= 0:
         continue
 
-    x1 = centerOfCoordinates(coordinates[0]["x"])
-    x2 = centerOfCoordinates(coordinates[len(coordinates) - 1]["x"])
-    y1 = centerOfCoordinates(coordinates[0]["y"])
-    y2 = centerOfCoordinates(coordinates[len(coordinates) - 1]["y"])
+    x1 = centerCoordinate(coordinates[0]["x"])
+    x2 = centerCoordinate(coordinates[len(coordinates) - 1]["x"])
+    y1 = centerCoordinate(coordinates[0]["y"])
+    y2 = centerCoordinate(coordinates[len(coordinates) - 1]["y"])
 
     print("1: " + str(x1) + ", " + str(y1) + " 2: " + str(x2) + ", " + str(y2))
     print(math.floor(tangent_angle([x1, y1], [x2, y2])))
