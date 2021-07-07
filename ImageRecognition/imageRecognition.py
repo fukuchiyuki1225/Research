@@ -1,5 +1,7 @@
 import cv2
 import numpy as np
+import traceback
+import math
 
 # 中心座標を求める関数
 def centerCoordinate(coordinates):
@@ -8,8 +10,11 @@ def centerCoordinate(coordinates):
         value += coordinates[coor]
     return value / 4
 
-# 画像認識を行い，オブジェクトの座標位置を返す関数
+# 画像認識を行い，オブジェクトの座標位置(中心座標)を返す関数
 def imageRecognition(template, screenshot):
+    template = cv2.imread(template)
+    screenshot = cv2.imread(screenshot)
+
     # 物体検出に必要な対応点の数の下限
     MIN_MATCH_COUNT = 10
 
@@ -37,17 +42,20 @@ def imageRecognition(template, screenshot):
                 good.append(m)
 
         # 対応点がMIN_MATCH_COUNT以上あれば物体を検出
-        if len(good) > MIN_MATCH_COUNT:
+        if len(good) >= MIN_MATCH_COUNT:
             src_pts = np.float32([ kp_t[m.queryIdx].pt for m in good ]).reshape(-1,1,2)
             dst_pts = np.float32([ kp_s[m.trainIdx].pt for m in good ]).reshape(-1,1,2)
 
-            M = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC,5.0)
+            M, mask = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC,5.0)
 
             h,w = template.shape[:2]
             pts = np.float32([ [0,0],[0,h-1],[w-1,h-1],[w-1,0] ]).reshape(-1,1,2)
-            dst = cv2.perspectiveTransform(pts,M)
 
-            screenshot = cv2.polylines(screenshot,[np.int32(dst)],True,255,3, cv2.LINE_AA)
+            if (M is None):
+                # print("not match")
+                return None
+
+            dst = cv2.perspectiveTransform(pts,M)
                 
             flattenCoors = np.int32(dst).flatten()
 
@@ -69,10 +77,32 @@ def imageRecognition(template, screenshot):
                 }
             )
 
-            return [centerCoordinate(coordinates[0]["x"]), centerCoordinate(coordinates[0]["y"])]
+            # print("match")
+            
+            """
+            座標確認用
+            cv2.circle(screenshot, (coordinates[0]["x"]["upperLeft"], coordinates[0]["y"]["upperLeft"]), 10, (225, 0, 0), thickness=-1)
+            cv2.circle(screenshot, (coordinates[0]["x"]["lowerLeft"], coordinates[0]["y"]["lowerLeft"]), 10, (225, 0, 0), thickness=-1)
+            cv2.circle(screenshot, (coordinates[0]["x"]["lowerRight"], coordinates[0]["y"]["lowerRight"]), 10, (225, 0, 0), thickness=-1)
+            cv2.circle(screenshot, (coordinates[0]["x"]["upperRight"], coordinates[0]["y"]["upperRight"]), 10, (225, 0, 0), thickness=-1)
+
+            print("upperLeft X: " + str(coordinates[0]["x"]["upperLeft"]) + " Y: " + str(coordinates[0]["y"]["upperLeft"]))
+            print("lowerLeft X: " + str(coordinates[0]["x"]["lowerLeft"]) + " Y: " + str(coordinates[0]["y"]["lowerLeft"]))
+            print("lowerRight X: " + str(coordinates[0]["x"]["lowerRight"]) + " Y: " + str(coordinates[0]["y"]["lowerRight"]))
+            print("upperRight X: " + str(coordinates[0]["x"]["upperRight"]) + " Y: " + str(coordinates[0]["y"]["upperRight"]))
+
+            cv2.imshow("", screenshot)
+            cv2.waitKey(0)
+            """
+
+            return [len(good), centerCoordinate(coordinates[0]["x"]), centerCoordinate(coordinates[0]["y"])]
+
+        else:
+            # print("not match")
+            return None          
 
     except Exception as e:
-        print("error")
+        print(traceback.format_exc())
 
     
 
