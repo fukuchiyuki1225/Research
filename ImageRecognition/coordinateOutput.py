@@ -1,31 +1,66 @@
 import os
 import pandas as pd
 import imageRecognition
-import cv2
-
-templete = ""
 
 # スクリーンショットがあるディレクトリのパス
-screenshot = "/Users/yuki-f/Documents/SocSEL/Research/Selenium/dataset/sample/screenshots"
+screenshot = "/Users/yuki-f/Documents/SocSEL/Research/ObjectIdentification/screenshots"
+
+dataset = pd.read_csv("/Users/yuki-f/Documents/SocSEL/Research/ObjectIdentification/dataset.csv", usecols=[2, 4])
 
 # 各スクリーンショットに対して画像認識を行い，オブジェクトの座標位置の時系列データを出力
-for pathName, dirName, fileNames in os.walk(screenshot):
+for pathName1, dirName1, fileNames1 in os.walk(screenshot):
     # 各作品のスクリーンショットの数を取得
-    fileLen = len([fileName for fileName in fileNames if not fileName.startswith(".")])
+    fileLen = len([fileName1 for fileName1 in fileNames1 if not fileName1.startswith(".")])
 
     # ディレクトリが空（スクショが存在しない）の場合はスキップ
     if fileLen == 0:
         continue
 
-    prjId = pathName.rsplit("/")[len(pathName.rsplit("/")) - 1]
+    # 作品idを取得
+    prjId = pathName1.rsplit("/")[len(pathName1.rsplit("/")) - 1]
 
-    tsData = pd.DataFrame(columns=["time", "sprite", "x", "y"])
+    print(prjId)
 
-    for i in range(fileLen):
-        fileName = pathName + "/" + prjId + "-" + str(i) + ".png"
+    # 取得したオブジェクトの座標位置を時系列データとして格納するdf
+    tsData = pd.DataFrame(columns=["time", "sprite", "match", "x", "y"])
 
-        print(imageRecognition.imageRecognition(cv2.imread(templete), cv2.imread(fileName)))
-        
-        
+    # 作品で使われているデフォルトスプライトのリスト
+    sprites = dataset[dataset["p_ID"] == int(prjId)]["sprite-name"].values
 
+    if len(sprites) == 0:
+        continue
+
+    spritePath = "/Users/yuki-f/Documents/SocSEL/Research/ObjectIdentification/sprites"
+
+    for sprite in sprites:
+        if sprite == "Sprite1":
+            sprite = "Cat"
+
+        for pathName2, dirName2, fileNames2 in os.walk(spritePath + "/" + sprite):
+            for fileName2 in fileNames2:
+                if fileName2.startswith("."):
+                    continue
+                
+                template = spritePath + "/" + sprite + "/" + fileName2
+                
+                for j in range(fileLen):
+                    screenshot = pathName1 + "/" + prjId + "-" + str(j) + ".png"
+
+                    # print(prjId + " : " + str(j) + " : " + sprite + " : " + fileName2)
+                    
+                    result = imageRecognition.imageRecognition(template, screenshot)
+                    if result is not None:
+                        addRow = pd.DataFrame([[j, sprite, result[0], result[1], result[2]]], columns=["time", "sprite", "match", "x", "y"])
+                        tsData = tsData.append(addRow)
+
+    if len(tsData) > 0:
+        # matchで降順にソート
+        tsData = tsData.sort_values("match", ascending=False)
+        # time&spriteの重複を削除
+        tsData = tsData.drop_duplicates(subset=["time", "sprite"])
+        # spriteで再ソート
+        tsData = tsData.sort_values("sprite")
+        # timeで再ソート
+        tsData = tsData.sort_values("time")
+        tsData.to_csv("/Users/yuki-f/Documents/SocSEL/Research/ImageRecognition/tsData/" + prjId + ".csv")
     
