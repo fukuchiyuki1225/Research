@@ -3,7 +3,7 @@ import pandas as pd
 import imageRecognition
 
 # スクリーンショットがあるディレクトリのパス
-screenshot = "/Users/yuki-f/Documents/SocSEL/Research/ObjectIdentification/sample"
+screenshot = "/Users/yuki-f/Documents/SocSEL/Research/ObjectIdentification/screenshots"
 
 # 検索対象作品で使われているスプライト情報のデータセット
 dataset = pd.read_csv("/Users/yuki-f/Documents/SocSEL/Research/ObjectIdentification/dataset.csv", usecols=[2, 4])
@@ -63,9 +63,7 @@ for pathName1, dirName1, fileNames1 in os.walk(screenshot):
         tsData = tsData.sort_values("match", ascending=False)
         # time&spriteの重複を削除
         tsData = tsData.drop_duplicates(subset=["time", "sprite"])
-        # spriteで再ソート
-        tsData = tsData.sort_values("sprite")
-        # timeで再ソート
-        tsData = tsData.sort_values("time")
+        # spriteとtimeで再ソート
+        tsData = tsData.sort_values(by=["sprite", "time"])
         tsData.to_csv("/Users/yuki-f/Documents/SocSEL/Research/ImageRecognition/tsData/" + prjId + ".csv")
     

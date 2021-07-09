@@ -89,7 +89,7 @@ def imageRecognition(template, screenshot):
 
             cv2.imshow("", screenshot)
             cv2.waitKey(0)
-            """
+            
 
             draw_params = dict(matchColor = (0,255,0), # draw matches in green color
                 singlePointColor = None,
@@ -101,6 +101,7 @@ def imageRecognition(template, screenshot):
 
             cv2.imshow("", img)
             cv2.waitKey(0)
+            """
 
             return [len(good), centerCoordinate(coordinates["x"]), centerCoordinate(coordinates["y"])]
 
