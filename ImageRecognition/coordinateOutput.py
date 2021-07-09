@@ -3,8 +3,9 @@ import pandas as pd
 import imageRecognition
 
 # スクリーンショットがあるディレクトリのパス
-screenshot = "/Users/yuki-f/Documents/SocSEL/Research/ObjectIdentification/screenshots"
+screenshot = "/Users/yuki-f/Documents/SocSEL/Research/ObjectIdentification/sample"
 
+# 検索対象作品で使われているスプライト情報のデータセット
 dataset = pd.read_csv("/Users/yuki-f/Documents/SocSEL/Research/ObjectIdentification/dataset.csv", usecols=[2, 4])
 
 # 各スクリーンショットに対して画像認識を行い，オブジェクトの座標位置の時系列データを出力
@@ -40,6 +41,9 @@ for pathName1, dirName1, fileNames1 in os.walk(screenshot):
             for fileName2 in fileNames2:
                 if fileName2.startswith("."):
                     continue
+
+                print("スプライト名: " + sprite)
+                print("テンプレート画像のファイル名: " + fileName2)
                 
                 template = spritePath + "/" + sprite + "/" + fileName2
                 
@@ -51,6 +55,7 @@ for pathName1, dirName1, fileNames1 in os.walk(screenshot):
                     result = imageRecognition.imageRecognition(template, screenshot)
                     if result is not None:
                         addRow = pd.DataFrame([[j, sprite, result[0], result[1], result[2]]], columns=["time", "sprite", "match", "x", "y"])
+                        print(addRow)
                         tsData = tsData.append(addRow)
 
     if len(tsData) > 0:
