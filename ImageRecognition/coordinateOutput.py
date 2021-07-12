@@ -3,10 +3,10 @@ import pandas as pd
 import imageRecognition
 
 # スクリーンショットがあるディレクトリのパス
-screenshot = "/Users/yuki-f/Documents/SocSEL/Research/ObjectIdentification/screenshots"
+screenshot = "/mnt/data1/yuki-f/screenshots"
 
 # 検索対象作品で使われているスプライト情報のデータセット
-dataset = pd.read_csv("/Users/yuki-f/Documents/SocSEL/Research/ObjectIdentification/dataset.csv", usecols=[2, 4])
+dataset = pd.read_csv("/mnt/data1/yuki-f/dataset.csv", usecols=[2, 4])
 
 # 各スクリーンショットに対して画像認識を行い，オブジェクトの座標位置の時系列データを出力
 for pathName1, dirName1, fileNames1 in os.walk(screenshot):
@@ -31,7 +31,7 @@ for pathName1, dirName1, fileNames1 in os.walk(screenshot):
     if len(sprites) == 0:
         continue
 
-    spritePath = "/Users/yuki-f/Documents/SocSEL/Research/ObjectIdentification/sprites"
+    spritePath = "/mnt/data1/yuki-f/sprites"
 
     for sprite in sprites:
         if sprite == "Sprite1":
@@ -65,5 +65,5 @@ for pathName1, dirName1, fileNames1 in os.walk(screenshot):
         tsData = tsData.drop_duplicates(subset=["time", "sprite"])
         # spriteとtimeで再ソート
         tsData = tsData.sort_values(by=["sprite", "time"])
-        tsData.to_csv("/Users/yuki-f/Documents/SocSEL/Research/ImageRecognition/tsData/" + prjId + ".csv")
+        tsData.to_csv("/mnt/data1/yuki-f/tsData/" + prjId + ".csv")
     
