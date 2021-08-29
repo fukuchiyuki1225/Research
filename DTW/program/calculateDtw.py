@@ -176,7 +176,4 @@ def checkData(lastData, n1, n2):
 
 tsData = splitTsData("/Users/yuki-f/Desktop/tsData6")
 drawHeatmap(tsData)
-
-
-
-        
+    
