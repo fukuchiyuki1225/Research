@@ -11,6 +11,10 @@ def splitTsData(tsDataPath, savePath):
     for pathName, dirName, fileNames in os.walk(tsDataPath):
         # 動作番号
         mvNum = 0
+        
+        # 使用する1動作 and 除外する（条件1 or 2 or 3に当てはまる）動作の数を保持
+        count = [0] * 4
+        
         for fileName in fileNames:
             if fileName.startswith("."):
                 continue
@@ -36,7 +40,10 @@ def splitTsData(tsDataPath, savePath):
                     sliceNum = i
                     outputData = outputData.reset_index(drop=True)
                     
-                    if checkData(outputData):
+                    check, typeNum = checkData(outputData)
+                    count[typeNum] += 1
+                    
+                    if check:
                         outputData = outputData[:0]
                         continue
 
@@ -49,31 +56,39 @@ def splitTsData(tsDataPath, savePath):
                 outputData = outputData.append(addRow)
             outputData = outputData.reset_index(drop=True)
             
-            # 1動作の全てのフレームにおいて座標が同じでないかを判定
-            if checkData(outputData):
+            check, typeNum = checkData(outputData)
+            count[typeNum] += 1
+            if check:
                 continue
 
             outputData.to_csv(savePath + "/" + str(mvNum) + ".csv")
+            mvNum += 1
+        
+        print("使用: " + str(count[0]))
+        print("除外(条件1): " + str(count[1]))
+        print("除外(条件2): " + str(count[2]))
+        print("除外(条件3): " + str(count[3]))
 
 # 1動作の座標データが条件を満たすかを判定
 # 返り値がTrueの場合，その1動作は除外
 def checkData(outputData):
-    # 条件：1動作のフレーム数が5以上
+    # 条件1： 1動作のフレーム数が5以上
     if len(outputData) < 5:
-        return True
+        return True, 1
 
-    # 条件：値が負でない
+    # 条件2： 値が負でない
     for i in range(len(outputData)):
         if outputData.at[i, "x"] < 0 or outputData.at[i, "y"] < 0:
-            return True
+            return True, 2
 
-    # 条件：1動作の全てのフレームにおいて座標が同じでない
+    # 条件3： 1動作の全てのフレームにおいて座標が同じでない
     firstX = outputData.at[0, "x"]
     firstY = outputData.at[0, "y"]
     for i in range(1, len(outputData)):
         if outputData.at[i, "x"] != firstX or outputData.at[i, "y"] != firstY:
-            return False
-    return True
+            return False, 0
+        
+    return True, 3
 
 # 各1動作の組み合わせごとにDTW距離を算出
 def calculateDtw(splittedDataPath):
@@ -203,6 +218,6 @@ def get_min(m0, m1, m2, i, j):
             return i - 1, j - 1, m2
 
         
-# splitTsData("/Users/yuki-f/Documents/SocSEL/Research/ImageRecognition/dataset/tsData5", "/Users/yuki-f/Documents/SocSEL/Research/ImageRecognition/dataset/splitted5")
+splitTsData("/Users/yuki-f/Documents/SocSEL/Research/ImageRecognition/dataset/tsData5", "/Users/yuki-f/Documents/SocSEL/Research/ImageRecognition/dataset/splitted5")
 
 calculateDtw("/Users/yuki-f/Documents/SocSEL/Research/ImageRecognition/dataset/splitted5")
