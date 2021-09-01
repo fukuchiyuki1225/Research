@@ -1,6 +1,10 @@
 import os
 import pandas as pd
 import numpy as np
+from tslearn.preprocessing import TimeSeriesScalerMinMax
+from tslearn.utils import to_time_series_dataset
+import itertools
+import time
 
 # 各作品の時系列データを１つの動作ごとに分割
 def splitTsData(tsDataPath, savePath):
@@ -8,6 +12,9 @@ def splitTsData(tsDataPath, savePath):
         # 動作番号
         mvNum = 0
         for fileName in fileNames:
+            if fileName.startswith("."):
+                continue
+            
             prjId = fileName.rsplit(".")[0]
 
             # 分割前のtsData
@@ -24,7 +31,7 @@ def splitTsData(tsDataPath, savePath):
                 # 分割する条件：スプライトが変わっている or フレームから消える
                 if tsData.at[i, "sprite"] != tsData.at[i - 1, "sprite"] or tsData.at[i, "time"] != tsData.at[i - 1, "time"] + 1:
                     for j in range(sliceNum, i):
-                        addRow = pd.DataFrame([[tsData.at[j, "time"], prjId, tsData.at[j, "sprite"], tsData.at[j, "x"], tsData.at[j, "y"]]], columns=["time", "prjId", "sprite", "x", "y"])
+                        addRow = pd.DataFrame([[tsData.at[j, "time"], prjId, tsData.at[j, "sprite"], round(tsData.at[j, "x"]), round(tsData.at[j, "y"])]], columns=["time", "prjId", "sprite", "x", "y"])
                         outputData = outputData.append(addRow)
                     sliceNum = i
                     outputData = outputData.reset_index(drop=True)
@@ -38,7 +45,7 @@ def splitTsData(tsDataPath, savePath):
                     mvNum += 1
 
             for i in range(sliceNum, len(tsData)):
-                addRow = pd.DataFrame([[tsData.at[i, "time"], prjId, tsData.at[i, "sprite"], tsData.at[i, "x"], tsData.at[i, "y"]]], columns=["time", "prjId", "sprite", "x", "y"])
+                addRow = pd.DataFrame([[tsData.at[i, "time"], prjId, tsData.at[i, "sprite"], round(tsData.at[i, "x"]), round(tsData.at[i, "y"])]], columns=["time", "prjId", "sprite", "x", "y"])
                 outputData = outputData.append(addRow)
             outputData = outputData.reset_index(drop=True)
             
@@ -70,11 +77,57 @@ def checkData(outputData):
 
 # 各1動作の組み合わせごとにDTW距離を算出
 def calculateDtw(splittedDataPath):
+    # ファイル数の確認
+    fileLen = 0
     for pathName, dirName, fileNames in os.walk(splittedDataPath):
-        # 1動作のcsvを読み込み，配列に保持（配列の番号=動作番号）
-        splittedData = []
-        for i in range(len(fileNames)):
-            splittedData.insert(i, pd.read_csv(splittedDataPath + "/" + str(i) + ".csv", usecols=["x", "y"]).values)
+        fileLen = len(fileNames)
+        for fileName in fileNames:
+            if fileName.startswith("."):
+                fileLen -= 1
+        
+    # 1動作のcsvを読み込み，配列に保持（配列のインデックス=動作番号）
+    splittedData = []
+    prjIds = []
+    for i in range(fileLen):
+        splittedData.insert(i, pd.read_csv(splittedDataPath + "/" + str(i) + ".csv", usecols=["x", "y"]).values)
+        prjIds.insert(i, pd.read_csv(splittedDataPath + "/" + str(i) + ".csv", usecols=["prjId"]).values[0])
+            
+        # データの正規化(0~1)
+        splittedData[i] = TimeSeriesScalerMinMax().fit_transform(to_time_series_dataset([splittedData[i]])).flatten().reshape(-1, 2)
+        
+    # データ確認用のprint
+    # print(splittedData[22])
+    # print(prjIds[22])
+        
+    # 組み合わせを保持
+    dataNum = list(range(fileLen))
+    combs = list(itertools.combinations(dataNum, 2))
+        
+    dtwResult = pd.DataFrame(columns=["i", "j", "dtw"])
+    count = 0
+    start = time.time()
+    # 各組み合わせごとにDTW距離を算出
+    for comb in combs:
+        count += 1
+        # 10000の動作ペアごとに実行時間を表示 and dtwResultをcsvファイルに出力
+        if count % 10000 == 0:
+            elapsed = time.time() - start
+            print(str(count) + ": " + str(elapsed))
+            start = time.time()
+            dtwResult.sort_values("dtw").to_csv("/Users/yuki-f/Documents/SocSEL/Research/DTW/dtw-" + str(count) + ".csv")
+            dtwResult = dtwResult[:0]   
+        
+        i = comb[0]
+        j = comb[1]
+        
+        # 同じ作品に含まれる動作の組み合わせはスキップ
+        if prjIds[i] == prjIds[j]:
+            continue
+        
+        dtwVal = dtw(splittedData[i], splittedData[j])[1]
+        # print(str(count) + "/" + str(len(combs)) + ": " + str(dtwVal))
+        addRow = pd.DataFrame([[i, j, dtwVal]], columns=["i", "j", "dtw"])
+        dtwResult = dtwResult.append(addRow)
             
 # DTW距離を算出
 def dtw(x, y):
