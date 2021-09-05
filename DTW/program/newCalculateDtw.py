@@ -68,6 +68,8 @@ def splitTsData(tsDataPath, savePath):
         print("除外(条件1): " + str(count[1]))
         print("除外(条件2): " + str(count[2]))
         print("除外(条件3): " + str(count[3]))
+        outputDataNum = pd.DataFrame([[str(count[0]), str(count[1]), str(count[2]), str(count[3])]], columns=["use", "excl1", "excl2", "excl3"])
+        outputDataNum.to_csv("./dataNum.csv")
 
 # 1動作の座標データが条件を満たすかを判定
 # 返り値がTrueの場合，その1動作は除外
@@ -91,7 +93,7 @@ def checkData(outputData):
     return True, 3
 
 # 各1動作の組み合わせごとにDTW距離を算出
-def calculateDtw(splittedDataPath):
+def calculateDtw(splittedDataPath, savePath):
     # ファイル数の確認
     fileLen = 0
     for pathName, dirName, fileNames in os.walk(splittedDataPath):
@@ -129,7 +131,7 @@ def calculateDtw(splittedDataPath):
             elapsed = time.time() - start
             print(str(count) + ": " + str(elapsed))
             start = time.time()
-            dtwResult.sort_values("dtw").to_csv("/Users/yuki-f/Documents/SocSEL/Research/DTW/dtw-" + str(count) + ".csv")
+            dtwResult.sort_values("dtw").to_csv(savePath + "/dtw-" + str(count) + ".csv")
             dtwResult = dtwResult[:0]   
         
         i = comb[0]
@@ -143,6 +145,8 @@ def calculateDtw(splittedDataPath):
         # print(str(count) + "/" + str(len(combs)) + ": " + str(dtwVal))
         addRow = pd.DataFrame([[i, j, dtwVal]], columns=["i", "j", "dtw"])
         dtwResult = dtwResult.append(addRow)
+
+    dtwResult.sort_values("dtw").to_csv(savePath + "/dtw-" + str(count) + ".csv")
             
 # DTW距離を算出
 def dtw(x, y):
@@ -218,6 +222,6 @@ def get_min(m0, m1, m2, i, j):
             return i - 1, j - 1, m2
 
         
-splitTsData("/Users/yuki-f/Documents/SocSEL/Research/ImageRecognition/dataset/tsData5", "/Users/yuki-f/Documents/SocSEL/Research/ImageRecognition/dataset/splitted5")
+splitTsData("/mnt/data1/yuki-f/tsData", "/mnt/data1/yuki-f/splitted")
 
-calculateDtw("/Users/yuki-f/Documents/SocSEL/Research/ImageRecognition/dataset/splitted5")
+calculateDtw("/mnt/data1/yuki-f/splitted", "/mnt/data1/yuki-f/dtw")
