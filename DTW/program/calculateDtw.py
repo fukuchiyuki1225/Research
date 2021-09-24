@@ -24,8 +24,6 @@ def splitTsData(path):
             # 同じスプライトで何個目の動きかを保持
             sprNum = 0
 
-            mvNum = 0
-
             # csvからデータを分ける
             for i in range(1, len(data)):
                 # 1.スプライトが変わっている
@@ -35,7 +33,6 @@ def splitTsData(path):
                         tsData = tsData.append(addRow)
                     sliceNum = i
                     sprNum = 0
-                    mvNum += 1
             
                 # 2.フレームから一旦消え，別のフレームでまた復活している
                 elif data.at[i, "time"] != data.at[i-1, "time"] + 1:
@@ -44,7 +41,6 @@ def splitTsData(path):
                         tsData = tsData.append(addRow)
                     sliceNum = i
                     sprNum += 1
-                    mvNum += 1
                     
             for i in range(sliceNum, len(data)):
                 addRow = pd.DataFrame([[prjId + "_" + data.at[len(data)-1, "sprite"] + "_" + str(sprNum), data.at[i, "time"], data.at[i, "x"], data.at[i, "y"]]], columns=["prjId_sprite_sprNum", "time", "x", "y"])
