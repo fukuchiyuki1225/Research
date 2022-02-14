@@ -174,7 +174,7 @@ Scratchは，直感的にプログラムを実装可能なことや，プログ�
     \item スプライト: キャラクター等の画像のオブジェクトである．
     スプライトに対してスクリプトを制作することで，プログラムをスプライトに実行させる．
     作品制作の初期画面では，図\ref{scratchdisplay}の(3)に示すCatがあらかじめ配置されている．
-    ユーザはスプライトを複数配置することができ，Scratchで用意されている画像や，
+    ユーザはスプライトを複数配置することができ，Scratchが標準で用意している画像や，
     ユーザが創作した画像をスプライトとして使用可能である．
 \end{itemize}
 
@@ -333,7 +333,7 @@ C言語やJavaをはじめとするテキストベースのプログラミング
 \section{概要}
 本章では，動作のイメージを入力とするScratch作品の直感的検索手法を述べる．
 図\ref{flow}は，手法の概略図を示す．
-本論文では，\ref{scratchsetumei}章で説明したスクリプトによって画面上を動く
+本論文では，\ref{scratchsetumei}節で説明したスクリプトによって画面上を動く
 スプライトをオブジェクトと呼び，オブジェクトの動作を対象に検索を行う．
 手順1では，入力となる動作のイメージの座標変化をマウス描画によって，
 検索対象の作品に含まれるオブジェクトの動作の座標変化を画像認識によって取得する．
@@ -471,23 +471,36 @@ Scratchが標準画像として用意しているオブジェクト画像339件�
 \subsection{時系列データの正規化}
 本研究では，入力と検索対象動作の座標が離れている場合でも
 軌跡が類似していれば類似動作として抽出する．
-図\ref{}は，入力と動作の座標が離れているが，軌跡が類似している例を示す．
-図\ref{}は入力を示し，画面中央を矢印の方向に移動している．
-図\ref{}は検索対象動作を示し，画面下部を矢印の方向に移動している．
+図\ref{moveexample}は，入力と検索対象動作の移動する座標が離れているが，軌跡が類似している例を示す．
+図\ref{catmove}は入力を示し，画面中央を矢印の方向に移動している．
+図\ref{dogmove}は検索対象動作を示し，画面下部を矢印の方向に移動している．
 入力と検索対象動作が移動する座標は異なるが，いずれも矢印は右方向を向いているため，
 類似動作として抽出する．
-このような動作を抽出するために，
+このような動作の抽出に対応するために，
 手順1で取得した時系列データを最小値0，最大値1に正規化する．
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=7cm]{recognition.eps}
-    \caption{画像認識の例}
-    \label{recognition}
+    \begin{minipage}{0.45\linewidth}
+        \centering
+        \includegraphics[height=3cm]{catmove.eps}
+        \subcaption{入力の移動}
+        \label{catmove}
+    \end{minipage}
+    \hspace{0.04\columnwidth}
+    \begin{minipage}{0.45\linewidth}
+        \centering
+        \includegraphics[height=3cm]{dogmove.eps}
+        \subcaption{検索対象動作の移動}
+        \label{dogmove}
+    \end{minipage}
+    \hspace{0.04\columnwidth}
+    \caption{入力と検索対象動作の移動の例}
+    \label{moveexample}
 \end{figure}
 
 \subsection{DTW距離の算出}
-入力の時系列データと，各動作の時系列データの距離を，
+入力の座標変化と，検索対象動作の座標変化の距離を，
 動的時間伸縮法(DTW: Dynamic time warping)を用いて算出する．
 DTWは，2つの時系列データの距離を動的計画法に基づいて算出する手法である．
 DTWでは2つの時系列データの各点の距離を総当たりで算出し，
@@ -495,42 +508,44 @@ DTWでは2つの時系列データの各点の距離を総当たりで算出し�
 最短経路における累積距離が2つの時系列データの距離を示す．
 異なる長さの時系列データ同士でも距離を算出可能である．
 図\ref{dtw}に示すように，距離を算出する2つの時系列データ$S=s1,s2,...s15,T=t1,t2,...,t10$
-を横と縦に並べ，点(i,j)における要素siとtj間の距離を算出する．
+を横軸と縦軸に並べ，各マス(i,j)における要素siとtj間の距離を算出する．
 図中では，要素のマスの色が薄いほど距離が近く，濃いほど距離が遠いことを示す．
-時系列データSとTの各要素の累積距離が最も短くなる経路を探すことで距離を算出する．
+時系列データSとTの各要素の累積距離が最も短くなる経路を探すことで，2つの時系列データの距離を算出する．
 
 \begin{figure}[H]
     \centering
-    \includegraphics[height=6cm]{dtw.eps}
+    \includegraphics[height=10cm]{dtw.eps}
     \caption{動的時間伸縮法(DTW: Dynamic time warping)の概念図}
     \label{dtw}
 \end{figure}
 
-入力と検索対象の各動作の組み合わせで距離を求め，距離が近い動作を入力に類似する動作として抽出する．
-距離は0に近いほど類似していることを示し，値が大きくなるほど類似しないことを示す．
+入力と検索対象動作の距離を求め，距離が近い動作を入力に類似する動作として抽出する．
+距離は0に近いほど2つの時系列データが類似することを示し，値が大きくなるほど類似しないことを示す．
 
-続く4章では，実際に入力を行いDTW距離を算出した結果の分析及びその結果について述べる．
+続く4章では，類似動作を抽出する距離と提案手法の検索精度について明らかにする．
 
 
-\chapter{類似動作を抽出可能な距離の分析}
+\chapter{入力との距離算出結果の分析}
 \label{analysys}
 
 \section{概要}
-本章では，入力に類似する動作を抽出可能な距離を明らかにするため，
+本章では，入力に類似する動作を抽出可能な距離や提案手法の検索精度を明らかにするために，
 著者が実装したScratch作品検索システムを用いて複数の入力を行い，
-DTW距離の算出結果について定量分析と定性分析を行う．
+DTW距離の算出結果について分析を行う．
 定量分析では，距離を昇順に並べたある2点の傾きから距離が収束する値を求めることで，
-移動方向が全く異なる動作が抽出される距離を明らかにする．
+類似しない動作が抽出されるおおよその距離を明らかにする．
 定性分析では，定量分析で明らかにした距離以下の動作を提示し，
 動作の類似性を評価するアンケートを実施することで，類似動作を抽出可能な距離を明らかにする．
+最後に，ランキング指標を用いた検索評価を行うことで，提案手法の検索精度を明らかにする．
 
 \section{検索データセット}
-\ref{objectbehavior}で述べたように，キー入力やマウス操作などのユーザの操作を必要とするブロックを使用しておらず，
-動きブロックを使用している作品に含まれる，
-Scratchにデフォルトで用意されている画像を使用したオブジェクトの動作を検索対象とする．
-本分析で検索対象外とする作品に使用される，ユーザの操作を必要とするブロックを表\ref{interactionblock}に示す．
 Aivaloglouらの公開データセット\cite{dataset}\footnote{https://github.com/TUDelftScratchLab/ScratchDataset}
-に含まれる作品の中から条件を満たす13,437件の作品を用いる．
+に含まれる作品233,491件の中から，次に示す条件を満たす13,437件の作品を用いる．
+\begin{itemize}
+    \item 表\ref{interactionblock}に示すユーザの操作を必要とするブロックを使用しない作品
+    \item 動きブロックを使用した作品
+    \item Scratchが標準画像として用意する画像を使用した作品
+\end{itemize}
 
 \begin{table}
     \caption{ユーザの操作を必要とするブロック}
@@ -584,7 +599,7 @@ Aivaloglouらの公開データセット\cite{dataset}\footnote{https://github.c
 \end{figure}
 
 \section{入力}
-Scratchの作品内では，オブジェクトは直線や曲線の移動が行われるため，直線・曲線移動を行う2つの動作を入力する．
+オブジェクトの動作には，直線や曲線の移動があるため，直線・曲線移動を行う2つの動作を入力する．
 
 \begin{itemize}
     \item 入力a: 左から右へ直線移動(図\ref{input1})
@@ -633,20 +648,22 @@ Scratchの作品内では，オブジェクトは直線や曲線の移動が行�
 
 \section{定量分析}
 \label{teiryou}
-定量分析では，移動方向が異なる動作が抽出される距離を明らかにするために，
-距離を昇順に並べたある2点の傾きから距離が収束する値を求める．
-距離が収束する値は次に示す手順で求める．
+定量分析では，類似しない動作を抽出するおおよその距離を明らかにするために，
+距離を昇順に並べたある2点の傾きから収束する距離の値を，次に示す手順によって求める．
 
 \begin{enumerate}
     \item 距離が近い動作から50件ごとに傾きを算出
     \item 傾きが0.5を切る距離の動作のスナップショットを目視で確認
-    \item 2の結果，入力と類似しない動作であった場合，その距離以下の動作を提示
-    ただし，データセット数が多いため，各動作の距離を小数点第2位で四捨五入した値が重複する動作を削除
+    \item 2の結果，入力と類似しない動作であった場合，その距離を収束する距離とする
     \item 2の結果，入力と類似する動作であった場合，2以降の手順を再度行う
 \end{enumerate}
 
 各入力に対して定量分析を行なった結果を表\ref{quantitativeresult}に示す．
-定量分析で明らかにした距離は，\ref{teisei}の定性分析で実施するアンケートに提示する動作の抽出に用いる．
+また，各入力の収束する値までの距離の散布図を図\ref{graph}に示す．
+
+定量分析で明らかにした収束する距離は，
+類似しない動作を抽出する距離として
+\ref{teisei}の定性分析で実施するアンケートに提示する動作の抽出に用いる．
         
 \begin{table}[H]
     \caption{移動方向が異なる動作が抽出される距離}
@@ -667,11 +684,47 @@ Scratchの作品内では，オブジェクトは直線や曲線の移動が行�
     \end{tabular}
 \end{table}
 
+\begin{figure}[htbp]
+    \begin{tabular}{cc}
+      \begin{minipage}[t]{0.45\hsize}
+        \centering
+        \includegraphics[height=4.5cm]{graph-a.eps}
+        \subcaption{入力a}
+        \label{graph-a}
+      \end{minipage} &
+      \hspace{0.04\columnwidth} 
+      \begin{minipage}[t]{0.45\hsize}
+        \centering
+        \includegraphics[height=4.5cm]{graph-b.eps}
+        \subcaption{入力b}
+        \label{graph-b}
+      \end{minipage} \\
+      \\
+      \begin{minipage}[t]{0.45\hsize}
+        \centering
+        \includegraphics[height=4.5cm]{graph-c.eps}
+        \subcaption{入力c}
+        \label{graph-c}
+      \end{minipage} &
+      \hspace{0.04\columnwidth} 
+      \begin{minipage}[t]{0.45\hsize}
+        \centering
+        \includegraphics[height=4.5cm]{graph-d.eps}
+        \subcaption{入力d}
+        \label{graph-d}
+      \end{minipage} 
+    \end{tabular}
+    \caption{入力と検索対象動作の距離の散布図}
+    \label{graph}
+\end{figure}
+
 
 \section{定性分析}
 \label{teisei}
 定性分析では，入力に類似する動作を抽出可能な距離を明らかにするために，
 入力と各検索対象動作のDTW距離算出結果から距離の異なる複数の動作を提示し，動作の類似性をアンケートで評価する．
+アンケートに提示する動作は，\ref{teiryou}節で明らかにした類似しない動作を抽出する距離以下のものとする．
+ただし，動作数が多いため，本分析では小数第2位を四捨五入した距離が重複するものは提示しない．
 提示された動作が，入力と類似するかどうかを判断するために，次の1つ目の質問を設けた．
 
 \begin{itemize}
@@ -679,17 +732,17 @@ Scratchの作品内では，オブジェクトは直線や曲線の移動が行�
 \end{itemize}
 
 質問1に対して，4段階のリッカート尺度(1: 類似する，2: やや類似する，3: やや類似しない，4: 類似しない)で評価を行う．
-初めてアンケートの回答者全員が「4: 類似しない」を選択した距離を，
-本分析で明らかにする類似動作を抽出可能な距離とする．
+初めてアンケートの回答者全員が「4: 類似しない」を選択した距離を，類似動作を抽出可能な距離とする．
 また，回答者にとってどのような理由で評価に繋がるかについて明らかにするために，
 「1: 類似する」以外を選択した場合の理由を記述してもらった．
 
-さらに，本研究は他者のプログラムを参照することによる学習の支援を期待するため，
-提示された動作のプログラムを参考に入力と類似する動作を実装できるかについて判断する2つ目の質問を設けた．
+さらに，本研究は他者の作品を参照する学習の支援を期待するため，
+提示された動作のプログラムを参考に，入力と類似する動作を実装できるかについて判断する2つ目の質問を設けた．
 
 \begin{itemize}
     \item 質問2: プログラムを参考に入力と同じ動きを実装できますか？
 \end{itemize}
+
 
 質問2に対して，2値(1: 実装できる，2: 実装できない) で評価を行う．
 アンケートの回答結果から，「動作は類似しており，プログラムも参考になる」
@@ -701,14 +754,16 @@ Scratchの作品内では，オブジェクトは直線や曲線の移動が行�
 入力aのアンケート結果を表\ref{resulta}に示す．
 
 \begin{itemize}
-    \item 質問1: 最も距離の近い0.3から1.6の動作までは，回答者全員が「1: 類似する」を選択した．
-    距離1.7の動作について1名の回答者が「2: やや類似する」を選択しており，選択理由を「移動距離が短いため」としている．
-    距離3.2の動作では初めて「4: 類似しない」が選択された．
+    \item 質問1: 最も距離の近い0.3(図\ref{a_0_3})から1.6(図\ref{a_1_6})の動作までは，
+    回答者全員が「1: 類似する」を選択した．
+    距離1.7(図\ref{a_1_7})の動作について1名の回答者が「2: やや類似する」を選択しており，
+    選択理由を「移動距離が短いため」としている．
+    距離3.2(図\ref{a_3_2})の動作では初めて「4: 類似しない」が選択された．
     1名の回答者が選択しており，選択理由を「移動距離が非常に短いため」としている．
     距離1.7と距離3.2の事例から，オブジェクトの移動方向が入力と類似する場合にも，
     回答者によっては移動距離を理由に類似しないと判断することが考えられる．
-    距離4.3の動作では回答者全員が初めて「3: やや類似しない」を選択し，
-    次の距離4.4の動作では回答者全員が初めて「4: 類似しない」を選択した．
+    距離4.3(図\ref{a_4_3})の動作では回答者全員が初めて「3: やや類似しない」を選択し，
+    次の距離4.4(図\ref{a_4_4})の動作では回答者全員が初めて「4: 類似しない」を選択した．
     距離4.3の動作は，右方向へ移動しながらやや上方向への移動もしているため，
     回答者全員が「上方向への移動を含む」を理由に「3: やや類似しない」を選択した．
     また，距離4.4の動作は移動方向が類似していないために，回答者全員が「4: 類似しない」を選択した．
@@ -717,9 +772,10 @@ Scratchの作品内では，オブジェクトは直線や曲線の移動が行�
     初めて回答者全員が「4: 類似しない」を選択した距離が4.3であるため，
     入力aとの類似動作を抽出可能な距離は4.3未満となる．
     
-    \item 質問2: 最も距離の近い0.3から0.8の動作までは，回答者全員が「1: 実装できる」を選択した．
-    距離0.9の動作について1名の回答者が「2: 実装できない」を選択した．
-    距離0.9の動作のプログラムは，オブジェクトの持つ現在の「向き」に移動させる「(引数)歩動かす」ブロックを用いている．
+    \item 質問2: 最も距離の近い0.3から0.8(図\ref{a_0_8})の動作までは，回答者全員が「1: 実装できる」を選択した．
+    距離0.9(図\ref{a_0_9})の動作について1名の回答者が「2: 実装できない」を選択した．
+    距離0.9の動作のプログラムは，
+    オブジェクトの持つ現在の「向き」に移動させる「(引数)歩動かす」ブロックを用いている．
     「2: 実装できない」を選択した回答者は自由記入欄に実装できない理由を記述しており，
     「オブジェクトの向きが左に初期化されているため，右方向への移動が実装できない」としている．
     一方，「1: 実装できる」を選択した回答者は「オブジェクトの向きを右に初期化することで実装できる」と述べている．
@@ -737,24 +793,26 @@ Scratchの作品内では，オブジェクトは直線や曲線の移動が行�
 入力bのアンケート結果を表\ref{resultb}に示す．
 
 \begin{itemize}
-    \item 質問1: 最も距離の近い0.9と，2番目に距離の近い1.2の動作に対して，回答者全員が「1: 類似する」を選択した．
-    距離1.5から1.8の動作まで1名の同じ回答者が「2: やや類似する」を選択している．
+    \item 質問1: 最も距離の近い0.9(図\ref{b_0_9})と，
+    2番目に距離の近い1.2(図\ref{b_1_2})の動作に対して，回答者全員が「1: 類似する」を選択した．
+    距離1.5(図\ref{b_1_5})から1.8(図\ref{b_1_8})の動作まで1名の
+    同じ回答者が「2: やや類似する」を選択している．
     いずれの動作も，入力より横方向の移動距離が短く縦方向の移動距離が長くなっていることから，
     選択理由として「角度が異なる」と述べている．
-    また，距離1.6の動作について初めて「4: 類似しない」が選択された．
+    また，距離1.6(図\ref{b_1_6})の動作について初めて「4: 類似しない」が選択された．
     1名の回答者が選択しており，理由として「(画面端に当たって)反射しているように見える」と述べている．
     距離1.5から1.8の動作の事例から，類似性の判断のために移動角度に着目することが考えられる．
-    距離2.2の動作は左上から右下へ移動する動作であり，移動方向が類似しないために
+    距離2.2(図\ref{b_2_2})の動作は左上から右下へ移動する動作であり，移動方向が類似しないために
     初めて回答者全員が「4: 類似しない」を選択した．
     以降の距離で，2つの動作で「移動方向は類似するが，曲線移動をしていない」などを理由に
     「2: やや類似する」が選択されたが，多くの動作で「3: やや類似しない」「4: 類似しない」が選択されている．
-    距離2.8以降の全ての動作について，回答者全員が「4: 類似しない」を選択した．
+    距離2.8(図\ref{b_2_8})以降の全ての動作について，回答者全員が「4: 類似しない」を選択した．
     
     初めて回答者全員が「4: 類似しない」を選択した距離が2.2であるため，
     入力bとの類似動作を抽出可能な距離は2.2未満となる．
     
-    \item 質問2: 最も距離の近い0.9から1.3の動作まで，回答者全員が「1: 実装できる」を選択した．
-    距離1.4の動作について，質問1で「1: 類似する」「2: やや類似する」を選択したにもかかわらず，
+    \item 質問2: 最も距離の近い0.9から1.3(図\ref{b_1_3})の動作まで，回答者全員が「1: 実装できる」を選択した．
+    距離1.4(図\ref{b_1_4})の動作について，質問1で「1: 類似する」「2: やや類似する」を選択したにもかかわらず，
     回答者全員が「2: 実装できない」を選択した．
     一見，入力のような曲線を描くように見えたが，プログラムは曲線移動でなく直線移動が実装されていることが
     明らかになった．そのため，回答者全員が入力のような動作を実装できないとしている．
@@ -762,32 +820,34 @@ Scratchの作品内では，オブジェクトは直線や曲線の移動が行�
     乱数を生成する「(引数1)から(引数2)までの乱数」ブロックで決定しているため，
     2名の回答者が「2: 実装できない」を選択した事例がみられた．
     本研究では「(引数1)から(引数2)までの乱数」ブロックを用いた作品を除外していないため，
-    \ref{collection}で作品を収集した際の実行結果に依存する．
+    \ref{collection}項で作品を収集した際の実行結果に依存する．
     距離1.4や1.5，1.8などの動作から，
     動作が類似するにもかかわらず，プログラムを見ることで実際には入力のような実装ができない事例の存在が
     明らかになった．
-    距離2.4以降の全ての動作について，回答者全員が「4: 実装できない」を選択した．
+    距離2.4(図\ref{b_2_4})以降の全ての動作について，回答者全員が「4: 実装できない」を選択した．
 \end{itemize}    
     
 \subsubsection{入力c}
 入力cのアンケート結果を表\ref{resultc}に示す．
 
 \begin{itemize}
-    \item 質問1: 最も距離の近い1.7の動作に対して，回答者全員が「2: やや類似する」を選択した．
+    \item 質問1: 最も距離の近い1.7(図\ref{c_1_7})の動作に対して，回答者全員が「2: やや類似する」を選択した．
     距離1.7の動作は，入力同様，始点が左上の時計回りに四角形を描いているが，4辺のうち3辺が斜めに描かれるため，
     綺麗な四角形でないとして「2: やや類似する」を選択した．
-    また，距離2.6の動作でも同様の理由で「2: やや類似する」あるいは「3: やや類似しない」が選択された．
-    距離3.7から4.0までの動作は，いずれも同じ作品に含まれ，
+    また，距離2.6(図\ref{c_2_6})の動作でも同様の理由で「2: やや類似する」あるいは「3: やや類似しない」が選択された．
+    距離3.7(図\ref{c_3_7})から4.0(図\ref{c_4_0})までの動作は，いずれも同じ作品に含まれ，
     四角形を描く最初の右方向への1辺が短い，あるいは欠けている動作である．
     最初の右方向への1辺を理由に，1名が全てに対して「3: やや類似しない」を選択した．
     一方，「1: 類似する」「2: やや類似する」を選択した回答者もいる．
-    距離3.3と3.8で「2: やや類似する」を選択した回答者は，理由として「一部動きが欠けており，方向転換の際に
+    距離3.3(図\ref{c_3_3})と3.8(図\ref{c_3_8})で「2: やや類似する」を選択した回答者は，
+    理由として「一部動きが欠けており，方向転換の際に
     曲線を描いているように見えるが，全体的に類似している」と述べている．
-    距離4.1の動作について，初めて回答者全員が「4: 類似しない」を選択した．
-    また，距離4.1から4.4までの全ての動作について，四角形ではなく円を描く動作であることを理由に
+    距離4.1(図\ref{c_4_1})の動作について，初めて回答者全員が「4: 類似しない」を選択した．
+    また，距離4.1から4.4(図\ref{c_4_4})までの全ての動作について，四角形ではなく円を描く動作であることを理由に
     回答者全員が「4: 類似しない」を選択した．
     しかし，以降の距離には，2名以上が「1: 類似する」「2: やや類似する」を選択した動作が複数存在する．
-    距離4.5，4.9，5.5，5,6はいずれも四角形の4つの頂点にのみ移動する動作であり，
+    距離4.5(図\ref{c_4_5})，4.9(図\ref{c_4_9})，5.5(図\ref{c_5_5})，5,6(図\ref{c_5_6})は
+    いずれも四角形の4つの頂点にのみ移動する動作であり，
     辺を描いて少しずつ移動するものではないが，
     「2: やや類似する」を選択した回答者は「頂点を移動しているが四角形に見える」と述べている．
     
@@ -810,16 +870,16 @@ Scratchの作品内では，オブジェクトは直線や曲線の移動が行�
 入力dのアンケート結果を表\ref{resultd}に示す．
 
 \begin{itemize}
-    \item 質問1: 回答者全員が「1: 類似する」を選択した動作は最も距離の近い1.7の動作のみとなった．
+    \item 質問1: 回答者全員が「1: 類似する」を選択した動作は最も距離の近い1.7(図\ref{d_1_7})の動作のみとなった．
     以降の距離では「3: やや類似しない」「4: 類似しない」を多く選択している．
-    距離4.5の動作において，初めて回答者全員が「4: 類似しない」を選択した．
+    距離4.5(図\ref{d_4_5})の動作において，初めて回答者全員が「4: 類似しない」を選択した．
     距離4.5の動作は，四角形に移動する動作であり，
     「4: 類似しない」を選択した理由として回答者全員が「四角形を描く直線移動である」と述べている．
     ただし，距離4.5以降において，2名以上が「2: やや類似する」を選択した動作も存在する．
-    一例として，距離5.1の動作は入力よりも非常に小さい円を描いており，
+    一例として，距離5.1(図\ref{d_5_1})の動作は入力よりも非常に小さい円を描いており，
     2名の回答者は円が小さいことを理由に「2: やや類似する」を選択した．
     残りの1名は，その場でオブジェクトが回転しているように見えるとして「4: 類似しない」を選択した．
-    距離5.4，6.2，6.4の動作も同様の理由で同じ回答者が同じ選択をした．
+    距離5.4(図\ref{d_5_4})，6.2(図\ref{d_6_2})，6.4(図\ref{d_6_4})の動作も同様の理由で同じ回答者が同じ選択をした．
     この事例から，回答者によって動作の見方が異なることが明らかになった．
     
     初めて回答者全員が「4: 類似しない」を選択した距離が4.5であるため，
@@ -836,7 +896,7 @@ Scratchの作品内では，オブジェクトは直線や曲線の移動が行�
     発見できることが明らかになった．
 \end{itemize}
 
-\begin{table}
+\begin{table}[H]
     \caption{入力aのアンケート結果}
     \label{resulta}
     \centering
@@ -935,7 +995,65 @@ Scratchの作品内では，オブジェクトは直線や曲線の移動が行�
     }
 \end{table}
 
-\begin{table}
+\begin{figure}[H]
+    \begin{tabular}{cc}
+      \begin{minipage}[t]{0.45\hsize}
+        \centering
+        \includegraphics[height=5cm]{a_0_3.eps}
+        \subcaption{距離0.3の動作の座標変化}
+        \label{a_0_3}
+      \end{minipage} &
+      \begin{minipage}[t]{0.45\hsize}
+        \centering
+        \includegraphics[height=5cm]{a_0_8.eps}
+        \subcaption{距離0.8の動作の座標変化}
+        \label{a_0_8}
+      \end{minipage} \\
+   
+      \begin{minipage}[t]{0.45\hsize}
+        \centering
+        \includegraphics[height=5cm]{a_0_9.eps}
+        \subcaption{距離0.9の動作の座標変化}
+        \label{a_0_9}
+      \end{minipage} &
+      \begin{minipage}[t]{0.45\hsize}
+        \centering
+        \includegraphics[height=5cm]{a_1_6.eps}
+        \subcaption{距離1.6の動作の座標変化}
+        \label{a_1_6}
+      \end{minipage} \\
+      
+      \begin{minipage}[t]{0.45\hsize}
+        \centering
+        \includegraphics[height=5cm]{a_1_7.eps}
+        \subcaption{距離1.7の動作の座標変化}
+        \label{a_1_7}
+      \end{minipage} &
+      \begin{minipage}[t]{0.45\hsize}
+        \centering
+        \includegraphics[height=5cm]{a_3_2.eps}
+        \subcaption{距離3.2の動作の座標変化}
+        \label{a_3_2}
+      \end{minipage} \\
+      
+      \begin{minipage}[t]{0.45\hsize}
+        \centering
+        \includegraphics[height=5cm]{a_4_3.eps}
+        \subcaption{距離4.3の動作の座標変化}
+        \label{a_4_3}
+      \end{minipage} &
+      \begin{minipage}[t]{0.45\hsize}
+        \centering
+        \includegraphics[height=5cm]{a_4_4.eps}
+        \subcaption{距離4.4の動作の座標変化}
+        \label{a_4_4}
+      \end{minipage} \\
+    \end{tabular}
+    \caption{入力aのアンケートに提示した動作の例}
+    \label{inputa-ex}
+\end{figure}
+
+\begin{table}[H]
     \caption{入力bのアンケート結果}
     \label{resultb}
     \centering
@@ -994,7 +1112,84 @@ Scratchの作品内では，オブジェクトは直線や曲線の移動が行�
     }
 \end{table}
 
-\begin{table}
+\begin{figure}[H]
+    \begin{tabular}{cc}
+      \begin{minipage}[t]{0.45\hsize}
+        \centering
+        \includegraphics[height=5cm]{b_0_9.eps}
+        \subcaption{距離0.9の動作の座標変化}
+        \label{b_0_9}
+      \end{minipage} &
+      \begin{minipage}[t]{0.45\hsize}
+        \centering
+        \includegraphics[height=5cm]{b_1_2.eps}
+        \subcaption{距離1.2の動作の座標変化}
+        \label{b_1_2}
+      \end{minipage} \\
+   
+      \begin{minipage}[t]{0.45\hsize}
+        \centering
+        \includegraphics[height=5cm]{b_1_3.eps}
+        \subcaption{距離1.3の動作の座標変化}
+        \label{b_1_3}
+      \end{minipage} &
+      \begin{minipage}[t]{0.45\hsize}
+        \centering
+        \includegraphics[height=5cm]{b_1_4.eps}
+        \subcaption{距離1.4の動作の座標変化}
+        \label{b_1_4}
+      \end{minipage} \\
+      
+      \begin{minipage}[t]{0.45\hsize}
+        \centering
+        \includegraphics[height=5cm]{b_1_5.eps}
+        \subcaption{距離1.5の動作の座標変化}
+        \label{b_1_5}
+      \end{minipage} &
+      \begin{minipage}[t]{0.45\hsize}
+        \centering
+        \includegraphics[height=5cm]{b_1_6.eps}
+        \subcaption{距離1.6の動作の座標変化}
+        \label{b_1_6}
+      \end{minipage} \\
+      
+      \begin{minipage}[t]{0.45\hsize}
+        \centering
+        \includegraphics[height=5cm]{b_1_8.eps}
+        \subcaption{距離1.8の動作の座標変化}
+        \label{b_1_8}
+      \end{minipage} &
+      \begin{minipage}[t]{0.45\hsize}
+        \centering
+        \includegraphics[height=5cm]{b_2_2.eps}
+        \subcaption{距離2.2の動作の座標変化}
+        \label{b_2_2}
+      \end{minipage}
+      \end{tabular}
+    \caption{入力bのアンケートに提示した動作の例1}
+    \label{inputb-ex}
+\end{figure}
+
+\begin{figure}[H]
+    \begin{tabular}{cc}
+      \begin{minipage}[t]{0.45\hsize}
+        \centering
+        \includegraphics[height=5cm]{b_2_4.eps}
+        \subcaption{距離2.4の動作の座標変化}
+        \label{b_2_4}
+      \end{minipage} &
+      \begin{minipage}[t]{0.45\hsize}
+        \centering
+        \includegraphics[height=5cm]{b_2_8.eps}
+        \subcaption{距離2.8の動作の座標変化}
+        \label{b_2_8}
+      \end{minipage}
+    \end{tabular}
+    \caption{入力bのアンケートに提示した動作の例2}
+    \label{inputb-ex2}
+\end{figure}
+
+\begin{table}[H]
     \caption{入力cのアンケート結果}
     \label{resultc}
     \centering
@@ -1081,9 +1276,99 @@ Scratchの作品内では，オブジェクトは直線や曲線の移動が行�
     \hline
     \end{tabular}
     }
-\end{table}          
+\end{table} 
 
-\begin{table}
+\begin{figure}[H]
+    \begin{tabular}{cc}
+      \begin{minipage}[t]{0.45\hsize}
+        \centering
+        \includegraphics[height=5cm]{c_1_7.eps}
+        \subcaption{距離1.7の動作の座標変化}
+        \label{c_1_7}
+      \end{minipage} &
+      \begin{minipage}[t]{0.45\hsize}
+        \centering
+        \includegraphics[height=5cm]{c_2_6.eps}
+        \subcaption{距離2.6の動作の座標変化}
+        \label{c_2_6}
+      \end{minipage} \\
+   
+      \begin{minipage}[t]{0.45\hsize}
+        \centering
+        \includegraphics[height=5cm]{c_3_3.eps}
+        \subcaption{距離3.3の動作の座標変化}
+        \label{c_3_3}
+      \end{minipage} &
+      \begin{minipage}[t]{0.45\hsize}
+        \centering
+        \includegraphics[height=5cm]{c_3_7.eps}
+        \subcaption{距離3.7の動作の座標変化}
+        \label{c_3_7}
+      \end{minipage} \\
+      
+      \begin{minipage}[t]{0.45\hsize}
+        \centering
+        \includegraphics[height=5cm]{c_3_8.eps}
+        \subcaption{距離3.8の動作の座標変化}
+        \label{c_3_3}
+      \end{minipage} &
+      \begin{minipage}[t]{0.45\hsize}
+        \centering
+        \includegraphics[height=5cm]{c_4_0.eps}
+        \subcaption{距離4.0の動作の座標変化}
+        \label{c_4_0}
+      \end{minipage} \\
+      
+      \begin{minipage}[t]{0.45\hsize}
+        \centering
+        \includegraphics[height=5cm]{c_4_1.eps}
+        \subcaption{距離4.1の動作の座標変化}
+        \label{c_4_1}
+      \end{minipage} &
+      \begin{minipage}[t]{0.45\hsize}
+        \centering
+        \includegraphics[height=5cm]{c_4_4.eps}
+        \subcaption{距離4.4の動作の座標変化}
+        \label{c_4_4}
+      \end{minipage}
+      \end{tabular}
+    \caption{入力cのアンケートに提示した動作の例1}
+    \label{inputc-ex}
+\end{figure}    
+
+\begin{figure}[H]
+    \begin{tabular}{cc}
+      \begin{minipage}[t]{0.45\hsize}
+        \centering
+        \includegraphics[height=5cm]{c_4_5.eps}
+        \subcaption{距離4.5の動作の座標変化}
+        \label{c_4_5}
+      \end{minipage} &
+      \begin{minipage}[t]{0.45\hsize}
+        \centering
+        \includegraphics[height=5cm]{c_4_9.eps}
+        \subcaption{距離4.9の動作の座標変化}
+        \label{c_4_9}
+      \end{minipage} \\
+   
+      \begin{minipage}[t]{0.45\hsize}
+        \centering
+        \includegraphics[height=5cm]{c_5_5.eps}
+        \subcaption{距離5.5の動作の座標変化}
+        \label{c_5_5}
+      \end{minipage} &
+      \begin{minipage}[t]{0.45\hsize}
+        \centering
+        \includegraphics[height=5cm]{c_5_6.eps}
+        \subcaption{距離5.6の動作の座標変化}
+        \label{c_5_6}
+      \end{minipage} \\
+    \end{tabular}
+    \caption{入力cのアンケートに提示した動作の例2}
+    \label{inputc-ex2}
+\end{figure}        
+
+\begin{table}[H]
     \caption{入力dのアンケート結果}
     \label{resultd}
     \centering
@@ -1168,10 +1453,56 @@ Scratchの作品内では，オブジェクトは直線や曲線の移動が行�
     }
 \end{table} 
 
+\begin{figure}[H]
+    \begin{tabular}{cc}
+      \begin{minipage}[t]{0.45\hsize}
+        \centering
+        \includegraphics[height=5cm]{d_1_7.eps}
+        \subcaption{距離1.7の動作の座標変化}
+        \label{d_1_7}
+      \end{minipage} &
+      \begin{minipage}[t]{0.45\hsize}
+        \centering
+        \includegraphics[height=5cm]{d_4_5.eps}
+        \subcaption{距離4.5の動作の座標変化}
+        \label{d_4_5}
+      \end{minipage} \\
+   
+      \begin{minipage}[t]{0.45\hsize}
+        \centering
+        \includegraphics[height=5cm]{d_5_1.eps}
+        \subcaption{距離5.1の動作の座標変化}
+        \label{d_5_1}
+      \end{minipage} &
+      \begin{minipage}[t]{0.45\hsize}
+        \centering
+        \includegraphics[height=5cm]{d_5_4.eps}
+        \subcaption{距離5.4の動作の座標変化}
+        \label{d_5_4}
+      \end{minipage} \\
+      
+      \begin{minipage}[t]{0.45\hsize}
+        \centering
+        \includegraphics[height=5cm]{d_6_2.eps}
+        \subcaption{距離6.2の動作の座標変化}
+        \label{d_6_2}
+      \end{minipage} &
+      \begin{minipage}[t]{0.45\hsize}
+        \centering
+        \includegraphics[height=5cm]{d_6_4.eps}
+        \subcaption{距離6.4の動作の座標変化}
+        \label{d_6_4}
+      \end{minipage} \\
+      
+      \end{tabular}
+    \caption{入力dのアンケートに提示した動作の例}
+    \label{inputd-ex}
+\end{figure}
+
 \section{検索評価} 
 \label{ranking}     
 本研究で提案する検索手法の精度を評価するために，各入力に対する距離算出結果のうち，距離の近い上位20件を用いて
-\ref{teisei}と同様にアンケートを実施した．
+\ref{teisei}節と同様にアンケートを実施した．
 検索評価のために，平均逆順位(MRR: Mean Reciprocal Rank)を算出する．
 MRRは，ランキング中に初めて正解が出現した順位$rank$の逆数を全ての入力$Q$について平均した
 ランキング指標であり，式\ref{mrr}で求められる．
@@ -1284,7 +1615,6 @@ y座標が変化する際にx座標が変化しない(スナップショット6~
 \ref{ranking}の検索評価の結果からランキング上位に類似動作が出現することが期待できるため，
 動作に基づく作品検索は実用性があると考える．
 
-
 \section{抽出した類似動作のプログラム}
 \ref{teisei}で実施したアンケートへの回答時に，複数の実装方法の存在する動作が見られた．
 入力bとの距離算出結果が0.9の動作5と，2.1の動作6のプログラムを例に挙げ，
@@ -1296,7 +1626,7 @@ for文に該当する「(引数)回繰り返す」ブロックを用いて，オ
 一方，図\ref{6-program}に示す動作6のプログラムは，座標の指定と向きの変更を行うブロックを
 必要数並べることで実装している．
 動作5のプログラムは，「(引数)回繰り返す」ブロックを用いることで動作6のプログラムよりも可読性が高くなっている．
-動作6のプログラムは可読性が低いが，ブロックが1つずつ並べられていることから，
+動作6のプログラムは可読性が低いが，ブロックを1つずつ並べていることから，
 どのような順序でオブジェクトが動作しているかを理解しやすくなっている．
 動作5，6は，動作は類似するが実装方法に相違点があり，いずれのプログラムにも利点がある．
 このことから，実装方法の異なる類似動作を提示することは，
@@ -1327,22 +1657,20 @@ for文に該当する「(引数)回繰り返す」ブロックを用いて，オ
 
 
 \chapter{おわりに}
-本研究では，動作のイメージを入力とするScratch作品の直感的検索手法を提案し，
-複数の入力と検索対象動作の距離算出結果から，
-類似しない動作を抽出する距離について定量分析や動作の類似性について定性分析を実施した．
-分析結果から，次の知見が得られた．
+本論文では，動作のイメージを入力とするScratch作品の直感的検索手法を提案した．
+複数の入力と検索対象動作の距離算出結果に対して分析を行った結果から，次の知見が得られた．
 
 \begin{itemize}
     \item 本研究で提案した手法により，類似動作を検索可能であることが明らかになった．
     さらに，画像認識や座標変化取得の時間間隔といった検索の前処理における工夫や，
-    類似動作を抽出する距離の見直しによって検索精度の向上が期待できる．
+    類似動作を抽出する距離の見直しによって，さらなる検索精度の向上が期待できる．
     \item オブジェクトの動作に基づく検索により，類似動作の多様な実装方法を検索可能であることが明らかになった．
     実装方法の異なる類似動作を提示することは，プログラムの実装方法とより良い実装の両方の学習に繋がり，
     特に初学者も多く利用しているScratchにおいて有用である．
 \end{itemize}
 
-本研究で提案した手法により，
-ユーザのイメージする動作から容易に作品を検索することができるため，
+本論文で提案した手法により，
+ユーザのイメージする動作から多様な実装方法の作品を容易に検索することができるため，
 他者の作品を参照することによる実装方法学習の支援を期待する．
 さらに手法を改善することによって，より精度の高い作品検索の実現を期待する．
 
@@ -1353,7 +1681,20 @@ for文に該当する「(引数)回繰り返す」ブロックを用いて，オ
 %% 謝辞
 %%
  \begin{acknowledgements}
-%% 感謝します．
+    本研究を進めるにあたり，多くの方々に御指導，御協力，御支援を賜りました．
+    ここに御世話になった方々への感謝の意を記させて頂きました．
+    
+    はじめに，指導教員である和歌山大学システム工学部伊原彰紀講師に対し，厚く御礼申し上げます．
+    研究室配属以降，研究の進め方から，論文の執筆，プレゼンテーションの方法，礼儀，研究の面白さなど，
+    多くの御指導をして頂きました．特に学会発表などで，様々な研究者と交流する機会を数多く与えて頂き，
+    自分の知見を広げることができました．先生のご尽力に敬意を表し，心より感謝致します．
+    
+    和歌山大学ソーシャルソフトウェア工学研究室の方々には，研究活動に対する多大な御協力，
+    御助言を頂きました．研究活動だけでなく，大学生活において大変お世話になりました．
+    また，日々切磋琢磨し合う同期の仲間がいたことは，研究活動を進める上で支えとなりました．
+    心より感謝致します．
+    
+    最後になりましたが，研究活動を進めるにあたって支えてくださった家族に対し，心より深く感謝致します．
  \end{acknowledgements}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1400,14 +1741,25 @@ for文に該当する「(引数)回繰り返す」ブロックを用いて，オ
 　Distinctive Image Features from Scale-Invariant Keypoints,
 　International Journal of Computer Vision, Vol.60, pp.91-110, 2004.
 
-\bibitem{dtw}
-
 \bibitem{dataset}
     Efthimia Aivaloglou, Felienne Hermans, Jes\'{u}s Moreno-Le\'{o}n, Gregorio Robles,
     A dataset of scratch programs: scraped, shaped and scored,
     Proceeding of the 14th International Conference on Mining Software Repositories, pp.511-514, 2017.
 　
 \end{thebibliography}
+
+\chapter*{対外発表}
+\begin{enumerate}
+    \item 福地ユキ，伊原彰紀，山本豪志朗，橋谷直樹：
+    オブジェクト操作入力に基づくビジュアルプログラミング作品検出の試み，
+    情報処理学会 第83回全国大会 講演論文集，pp.265-266．2021．
+    \item 福地ユキ，伊原彰紀，山本豪志朗，橋谷直樹：
+    ビジュアルプログラミング作品検索のためのオブジェクト操作データの時系列解析，
+    2021年度 情報処理学会関西支部 支部大会 講演論文集，2021．
+    \item 福地ユキ，伊原彰紀，山本豪志朗，橋谷直樹：
+    オブジェクト動作経路の時系列解析に基づくビジュアルプログラム作品検索の試み，
+    第28回ソフトウェア工学の基礎ワークショップ(FOSE2021) デモ・ポスター発表，2021．
+\end{enumerate}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
