@@ -10,30 +10,50 @@ def centerCoordinate(coordinates):
     return value / 4
 
 # 画像認識を行い，オブジェクトの座標位置(中心座標)を返す関数
-def imageRecognition(template, screenshot):
-    template = cv2.imread(template)
-    screenshot = cv2.imread(screenshot)
+def imageRecognition(template_data, screenshot_data):
+    #template = cv2.imread(template)
+    #screenshot = cv2.imread(screenshot)
 
     # 物体検出に必要な対応点の数の下限
-    MIN_MATCH_COUNT = 10
+    MIN_MATCH_COUNT = 5
 
     # オブジェクトの座標位置を格納するリスト
     coordinates = {"x": "value", "y": "value"}
 
     # 検出器生成
-    sift = cv2.SIFT_create()
+    #sift = cv2.SIFT_create()
+
+    template, kp_t, des_t = template_data
+    _, kp_s, des_s = screenshot_data
 
     try:
         # 画像の特徴量（kp:特徴点の座標情報等, des:特徴量記述子）
-        kp_t,des_t = sift.detectAndCompute(template,None)
-        kp_s,des_s = sift.detectAndCompute(screenshot,None)
+        #kp_t, des_t = sift.detectAndCompute(template, None)
+        #kp_s, des_s = sift.detectAndCompute(screenshot, None)
+
+        #if des_t is None:
+        #    raise Exception("template NULL")
+        #if des_s is None:
+        #    raise Exception("screenshot NULL")
 
         FLANN_INDEX_KDTREE = 0
         index_params = dict(algorithm=FLANN_INDEX_KDTREE,tress=5)
         search_params = dict(checks=50)
-
+        
         flann = cv2.FlannBasedMatcher(index_params, search_params)
         matches = flann.knnMatch(des_t,des_s,k=2)
+
+        """
+        print("des_t: ")
+        print(des_t)
+        print()
+        print("des_s: ")
+        print(des_s)
+        print()
+
+        print("des_t: " + str(des_t.shape))
+        print("des_s: " + str(des_s.shape))
+        """
 
         ratio = 0.7
         good = []
@@ -47,15 +67,15 @@ def imageRecognition(template, screenshot):
             dst_pts = np.float32([kp_s[m.trainIdx].pt for m in good]).reshape(-1,1,2)
 
             M, mask = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC, 5.0)
+            
             matchesMask = mask.ravel().tolist()
 
             h,w = template.shape[:2]
             pts = np.float32([[0,0],[0,h-1],[w-1,h-1],[w-1,0]]).reshape(-1,1,2)
 
-            # if (M is None):
-                # print("not match")
-                # return None
-
+            if M is None:
+                return None
+            
             dst = cv2.perspectiveTransform(pts,M)
 
             flattenCoors = np.int32(dst).flatten()
@@ -110,7 +130,8 @@ def imageRecognition(template, screenshot):
             return None          
 
     except Exception as e:
-        print(traceback.format_exc())
+        print("KnnMatch Error")
+        return None
 
     
 

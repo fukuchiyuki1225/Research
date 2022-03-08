@@ -1,3 +1,5 @@
+# coding:utf-8
+
 import os
 import pandas as pd
 import numpy as np
@@ -48,6 +50,7 @@ def splitTsData(tsDataPath, savePath):
                         continue
 
                     outputData.to_csv(savePath + "/" + str(mvNum) + ".csv")
+                    print("output: " + str(mvNum) + ".csv")
                     outputData = outputData[:0]
                     mvNum += 1
 
@@ -62,6 +65,7 @@ def splitTsData(tsDataPath, savePath):
                 continue
 
             outputData.to_csv(savePath + "/" + str(mvNum) + ".csv")
+            print("output: " + str(mvNum) + ".csv")
             mvNum += 1
         
         print("使用: " + str(count[0]))
@@ -126,12 +130,18 @@ def calculateDtw(splittedDataPath, savePath):
     # 各組み合わせごとにDTW距離を算出
     for comb in combs:
         count += 1
+        
+        # 既にやった組み合わせはスキップ（途中からプログラムを回す場合）
+        if count <= 12790000:
+            continue
+
         # 10000の動作ペアごとに実行時間を表示 and dtwResultをcsvファイルに出力
         if count % 10000 == 0:
             elapsed = time.time() - start
             print(str(count) + ": " + str(elapsed))
             start = time.time()
             dtwResult.sort_values("dtw").to_csv(savePath + "/dtw-" + str(count) + ".csv")
+            print("output: " + "dtw-" + str(count) + ".csv")
             dtwResult = dtwResult[:0]   
         
         i = comb[0]
@@ -147,7 +157,8 @@ def calculateDtw(splittedDataPath, savePath):
         dtwResult = dtwResult.append(addRow)
 
     dtwResult.sort_values("dtw").to_csv(savePath + "/dtw-" + str(count) + ".csv")
-            
+    print("output: " + "dtw-" + str(count) + ".csv")            
+
 # DTW距離を算出
 def dtw(x, y):
     # xのデータ数，yのデータ数をそれぞれTx,Tyに代入
@@ -224,4 +235,4 @@ def get_min(m0, m1, m2, i, j):
         
 splitTsData("/mnt/data1/yuki-f/tsData", "/mnt/data1/yuki-f/splitted")
 
-calculateDtw("/mnt/data1/yuki-f/splitted", "/mnt/data1/yuki-f/dtw")
+# calculateDtw("/mnt/data1/yuki-f/splitted", "/mnt/data1/yuki-f/dtw")
